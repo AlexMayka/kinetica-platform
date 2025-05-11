@@ -1,0 +1,8 @@
+Command: ninja all
+[1/4] cd /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/esptool_py && /Users/aleksejmajka/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/partition_table/partition-table.bin /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/imu-sensor.bin
+imu-sensor.bin binary size 0x86910 bytes. Smallest app partition is 0x100000 bytes. 0x796f0 bytes (47%) free.
+[2/4] Performing build step for 'bootloader'
+[1/1] cd /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader/esp-idf/esptool_py && /Users/aleksejmajka/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader/bootloader.bin
+Bootloader binary size 0x5240 bytes. 0x2dc0 bytes (36%) free.
+[3/4] No install step for 'bootloader'
+[4/4] Completed 'bootloader'

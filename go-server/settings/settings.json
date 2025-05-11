@@ -1,0 +1,9 @@
+{
+  "BLE": {
+    "command_char_uuid" : "0000abf3-0000-1000-8000-00805f9b34fb"
+  },
+  "TCP": {
+    "server":   "localhost",
+    "port":     "9090"
+  }
+}

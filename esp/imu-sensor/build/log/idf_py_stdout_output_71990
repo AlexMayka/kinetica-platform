@@ -1,0 +1,20 @@
+Command: ninja all
+[1/11] Performing build step for 'bootloader'
+[1/1] cd /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader/esp-idf/esptool_py && /Users/aleksejmajka/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader/bootloader.bin
+Bootloader binary size 0x5240 bytes. 0x2dc0 bytes (36%) free.
+[2/11] No install step for 'bootloader'
+[3/11] Completed 'bootloader'
+[4/11] Building C object esp-idf/ble/CMakeFiles/__idf_ble.dir/ble.c.obj
+[5/11] Linking C static library esp-idf/ble/libble.a
+[6/11] Linking C static library esp-idf/main/libmain.a
+[7/11] Generating esp-idf/esp_system/ld/sections.ld
+[8/11] Building C object CMakeFiles/imu-sensor.elf.dir/project_elf_src_esp32c3.c.obj
+[9/11] Linking CXX executable imu-sensor.elf
+[10/11] Generating binary image from built executable
+esptool.py v4.9.dev7
+Creating esp32c3 image...
+Merged 1 ELF section
+Successfully created esp32c3 image.
+Generated /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/imu-sensor.bin
+[11/11] cd /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/esptool_py && /Users/aleksejmajka/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/partition_table/partition-table.bin /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/imu-sensor.bin
+imu-sensor.bin binary size 0x31f80 bytes. Smallest app partition is 0x100000 bytes. 0xce080 bytes (80%) free.

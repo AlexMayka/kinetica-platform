@@ -1,0 +1,770 @@
+===== ./cmd/main.go =====
+package main
+
+import (
+	"go-server/config"
+	"go-server/internal/console/banner"
+	"go-server/internal/device/ble"
+	"go-server/internal/device/wifi"
+	"go-server/internal/system"
+	"go-server/utils/errors"
+)
+
+func main() {
+	banner.LaunchAPP(config.AppVersion)
+
+	if err := system.CheckSystemRequirements(); err != nil {
+		errors.PrintError(err)
+		return
+	}
+
+	if err := config.Load(config.PathConfig); err != nil {
+		errors.PrintError(err)
+		return
+	}
+
+	if err := ble.InitBLE(); err != nil {
+		errors.PrintError(err)
+		return
+	}
+
+	if err := wifi.InitWifi(); err != nil {
+		errors.PrintError(err)
+		return
+	}
+}
+===== ./settings/settings.json =====
+{
+  "BLE": {
+    "command_char_uuid" : "0000abf3-0000-1000-8000-00805f9b34fb"
+  },
+  "TCP": {
+    "server":   "localhost",
+    "port":     "9090"
+  }
+}
+===== ./config/config.go =====
+package config
+
+import (
+	"encoding/json"
+	"go-server/internal/console"
+	"go-server/utils/errors/errorsConfig"
+	"io"
+	"os"
+)
+
+type BLE struct {
+	CommandCharUUID *string `json:"command_char_uuid"`
+}
+
+type TCP struct {
+	Server *string `json:"server"`
+	Port   *string `json:"port"`
+}
+
+type Config struct {
+	BLE *BLE `json:"BLE"`
+	TCP *TCP `json:"TCP"`
+}
+
+var config = &Config{}
+
+func readData(path string) (*[]byte, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, errorsConfig.ErrConfigOpen
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return nil, errorsConfig.ErrConfigRead
+	}
+	return &data, err
+}
+
+func (c *Config) Validate() error {
+	if c.BLE == nil {
+		return errorsConfig.ErrMissingBLE
+	}
+	if c.BLE.CommandCharUUID == nil || len(*c.BLE.CommandCharUUID) == 0 {
+		return errorsConfig.ErrMissingBLE
+	}
+
+	if c.TCP == nil {
+		return errorsConfig.ErrMissingTCP
+	}
+	if c.TCP.Server == nil || len(*c.TCP.Server) == 0 {
+		return errorsConfig.ErrMissingTCPServer
+	}
+	if c.TCP.Port == nil || len(*c.TCP.Port) == 0 {
+		return errorsConfig.ErrMissingTCPPort
+	}
+
+	return nil
+}
+
+func Load(path string) error {
+	done := console.PrintStatusBar("Initializing the config")
+	data, err := readData(path)
+	if err != nil {
+		done <- false
+		return err
+	}
+
+	if err := json.Unmarshal(*data, config); err != nil {
+		done <- false
+		return err
+	}
+
+	if err := config.Validate(); err != nil {
+		done <- false
+		return err
+	}
+
+	done <- true
+	return nil
+}
+
+func GetConfig() *Config {
+	return config
+}
+
+func GetBLE() *BLE {
+	return config.BLE
+}
+
+func GetTPC() *TCP {
+	return config.TCP
+}
+===== ./config/constants.go =====
+package config
+
+import "go-server/utils/os"
+
+const (
+	AppVersion = "v0.1.0"
+	PathConfig = "settings/settings.json"
+)
+
+var SupportOs = []os.OS{os.MacOs}
+===== ./config/config_test.go =====
+package config
+
+import (
+	"encoding/json"
+	"os"
+	"reflect"
+	"testing"
+)
+
+var (
+	testFileValidOne = `
+		{
+		  "BLE": {
+			"command_char_uuid" : "0000abf3-0000-1000-8000-00805f9b34fb"
+		  },
+		  "TCP": {
+			"server":   "localhost",
+			"port":     "9090"
+		  }
+		}
+	`
+
+	testFileValidTwo = `
+		{
+		  "BLE": {
+			"command_char_uuid" : "0000abf3-0000-1000-8000-00805f9b34fb"
+		  },
+		  "TCP": {
+			"server":   "localhost",
+			"port":     "9090"
+		  }
+		}
+	`
+
+	testFileInvalidOne = `
+		{
+		  "TCP": {
+			"server":   "localhost",
+			"port":     "9090"
+		  }
+		}
+	`
+
+	testFileInvalidTwo = `
+		{
+		  "BLE": {
+			"command_char_uuid" : ""
+		  },
+		  "TCP": {
+			"server":   "localhost",
+			"port":     "9090"
+		  }
+		}
+	`
+
+	testFileInvalidThree = `
+		{
+		  "BLE": {
+			"command_char_uuid" : "0000abf3-0000-1000-8000-00805f9b34fb"
+		  },
+		  "TCP": {
+			"port":     "9090"
+		  }
+		}
+	`
+
+	testFileInvalidFour = `
+	`
+)
+
+func createTestingFile(t *testing.T, inputData string) string {
+	t.Helper()
+
+	tmpFile, err := os.CreateTemp("", "test-config-*.json")
+	if err != nil {
+		t.Fatalf("error creating temp file: %v", err)
+	}
+	defer func() { _ = tmpFile.Close() }()
+
+	if _, err := tmpFile.Write([]byte(inputData)); err != nil {
+		t.Fatalf("error writing to temp file: %v", err)
+	}
+
+	return tmpFile.Name()
+}
+
+func TestReadData_FilePresence(t *testing.T) {
+	t.Run("Test 1: File exists", func(t *testing.T) {
+		path := createTestingFile(t, testFileValidOne)
+		t.Cleanup(func() {
+			_ = os.Remove(path)
+		})
+
+		data, err := readData(path)
+		if err != nil {
+			t.Fatalf("expected no error, got: %v", err)
+		}
+		if data == nil || len(*data) == 0 {
+			t.Errorf("expected data, got nil or empty")
+		}
+	})
+
+	t.Run("Test 2: File does not exist", func(t *testing.T) {
+		_, err := readData("nonexistent_file_123.json")
+		if err == nil {
+			t.Errorf("expected error when file is missing, got nil")
+		}
+	})
+
+	t.Run("Test 3: Parsed config must match file content", func(t *testing.T) {
+		path := createTestingFile(t, testFileValidOne)
+		t.Cleanup(func() {
+			_ = os.Remove(path)
+		})
+
+		// Чтение через функцию
+		value, err := readData(path)
+		if err != nil {
+			t.Fatalf("expected no error, got: %v", err)
+		}
+
+		var fromReadData Config
+		if err := json.Unmarshal(*value, &fromReadData); err != nil {
+			t.Fatalf("failed to unmarshal from readData: %v", err)
+		}
+
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("failed to read file directly: %v", err)
+		}
+
+		var fromDisk Config
+		if err := json.Unmarshal(raw, &fromDisk); err != nil {
+			t.Fatalf("failed to unmarshal from disk: %v", err)
+		}
+
+		if !reflect.DeepEqual(fromReadData, fromDisk) {
+			t.Errorf("configs not equal:\nfrom readData: %+v\nfrom file: %+v", fromReadData, fromDisk)
+		}
+	})
+}
+
+func TestInitConfig(t *testing.T) {
+	t.Run("Parse Data", func(t *testing.T) {
+		tests := []struct {
+			name      string
+			input     string
+			shouldErr bool
+		}{
+			{"Test 1: Valid Data", testFileValidOne, false},
+			{"Test 2: Valid Data", testFileValidTwo, false},
+			{"Test 3: Invalid Data (missing BLE)", testFileInvalidOne, true},
+			{"Test 4: Invalid Data (empty BLE)", testFileInvalidTwo, true},
+			{"Test 5: Invalid Data (missing TCP.server)", testFileInvalidThree, true},
+			{"Test 6: Completely empty", testFileInvalidFour, true},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				config = &Config{}
+				path := createTestingFile(t, tt.input)
+				t.Cleanup(func() { _ = os.Remove(path) })
+
+				err := Load(path)
+
+				if tt.shouldErr {
+					if err == nil {
+						t.Errorf("expected error, got nil")
+					}
+					return
+				}
+
+				if err != nil {
+					t.Errorf("expected no error, got: %v", err)
+					return
+				}
+
+				var expected Config
+				if err := json.Unmarshal([]byte(tt.input), &expected); err != nil {
+					t.Fatalf("failed to unmarshal input into Config: %v", err)
+				}
+
+				got := GetConfig()
+				if !reflect.DeepEqual(expected, *got) {
+					t.Errorf("config mismatch:\nexpected: %+v\ngot:      %+v", expected, *got)
+				}
+			})
+		}
+	})
+}
+===== ./send_command.go =====
+package main
+===== ./internal/system/requirements.go =====
+package system
+
+import (
+	"go-server/config"
+	"go-server/internal/console"
+	"go-server/utils/errors/errorsApp"
+	"go-server/utils/os"
+)
+
+func CheckSystemRequirements() error {
+	done := console.PrintStatusBar("Check system requirements")
+
+	if !os.IsSupportedOs(&config.SupportOs) {
+		done <- false
+		return errorsApp.ErrOsNotSupported
+	}
+
+	if os.GetOS() == os.MacOs || os.GetOS() == os.Linux {
+		if !os.IsRoot() && !os.CheckWifiCmd() {
+			done <- false
+			return errorsApp.ErrNeedSudo
+		}
+	}
+
+	done <- true
+	return nil
+}
+===== ./internal/device/wifi/macos/launch.go =====
+package macos
+
+import (
+	"go-server/utils/errors/errorsWifi"
+	"os/exec"
+	"regexp"
+	"strings"
+)
+
+type WifiMacOs struct{}
+
+func getDevice() (*string, error) {
+	cmd := exec.Command("networksetup", "-listallhardwareports")
+	out, err := cmd.Output()
+
+	if err != nil {
+		return nil, errorsWifi.ErrDeviceNotFound
+	}
+
+	pattern := `Wi-Fi\s*Device:\s*(?<DvName>[\S]+)\s`
+	reg, _ := regexp.Compile(pattern)
+	result := reg.FindSubmatch(out)
+
+	if len(result) != 2 {
+		return nil, errorsWifi.ErrDeviceNotFound
+	}
+
+	device := string(result[1])
+
+	return &device, nil
+}
+
+func isActive(device *string) bool {
+	cmd := exec.Command("networksetup", "-getairportpower", *device)
+	out, err := cmd.Output()
+
+	if err != nil {
+		return false
+	}
+
+	return strings.Contains(string(out), "On")
+}
+
+func turning(device *string) error {
+	if isActive(device) {
+		return nil
+	}
+	cmd := exec.Command("networksetup", "-setairportpower", *device, "on")
+	_, err := cmd.Output()
+
+	if err != nil {
+		return errorsWifi.ErrWifiTuring
+	}
+
+	return nil
+}
+
+func (wifi *WifiMacOs) Launch() error {
+	device, err := getDevice()
+	if err != nil {
+		return err
+	}
+
+	if err := turning(device); err != nil {
+		return err
+	}
+
+	return nil
+}
+===== ./internal/device/wifi/wifi.go =====
+package wifi
+
+import (
+	"errors"
+	"fmt"
+	"go-server/internal/console"
+	"go-server/internal/device/wifi/macos"
+	"go-server/utils/os"
+)
+
+type Wifi interface {
+	Launch() error
+}
+
+var wifi Wifi
+
+func InitWifi() error {
+	done := console.PrintStatusBar("Initializing the Wifi")
+	switch os.GetOS() {
+	case os.MacOs:
+		wifi = &macos.WifiMacOs{}
+		if err := wifi.Launch(); err != nil {
+			done <- false
+			return err
+		}
+		done <- true
+		return nil
+
+	default:
+		done <- false
+		return errors.New(fmt.Sprintf("Unsupported OS: %s", os.GetOS()))
+	}
+}
+
+func GetWifi() Wifi {
+	return wifi
+}
+===== ./internal/device/ble/types.go =====
+package ble
+
+import (
+	"go-server/config"
+	"tinygo.org/x/bluetooth"
+)
+
+var (
+	ble *BLE
+	cnf *config.BLE
+)
+
+type BLE struct {
+	charUUID string
+	adapter  *bluetooth.Adapter
+	dev      *bluetooth.ScanResult
+	client   *bluetooth.Device
+}
+===== ./internal/device/ble/init.go =====
+package ble
+
+import (
+	"go-server/config"
+	"go-server/internal/console"
+	errBle "go-server/utils/errors/errorsBle"
+	"tinygo.org/x/bluetooth"
+)
+
+func InitBLE() error {
+	if ble != nil {
+		return nil
+	}
+
+	done := console.PrintStatusBar("Initializing the BLE")
+	adapter := bluetooth.DefaultAdapter
+	if err := adapter.Enable(); err != nil {
+		done <- false
+		return errBle.ErrBLEDisabled
+	}
+
+	cnf = config.GetBLE()
+
+	ble = &BLE{
+		adapter:  adapter,
+		charUUID: *cnf.CommandCharUUID,
+	}
+	done <- true
+	return nil
+}
+===== ./internal/device/device.go =====
+package device
+
+type Device interface {
+	Connect() error
+	Disconnect() error
+	SendData(command string) (err error)
+}
+===== ./internal/console/spinner.go =====
+package console
+
+import (
+	"fmt"
+	"time"
+)
+
+func PrintStatusBar(message string) chan bool {
+	done := make(chan bool)
+	go func(msg string) {
+		chars := []rune{'|', '/', '-', '\\'}
+		i := 0
+		for {
+			select {
+			case result := <-done:
+				clear := "\r\033[K"
+				if result {
+					fmt.Printf("%s%s ✅ \n", clear, msg)
+				} else {
+					fmt.Printf("%s%s ❌ \n", clear, msg)
+				}
+				close(done)
+				return
+			default:
+				fmt.Printf("\r%s %c", msg, chars[i%len(chars)])
+				time.Sleep(100 * time.Millisecond)
+				i++
+			}
+		}
+	}(message)
+	return done
+}
+===== ./internal/console/banner/banner.go =====
+package banner
+
+import (
+	"fmt"
+	"runtime"
+	"strings"
+	"time"
+)
+
+const banner = `
+                                                       
+ __  __     __     __   __     ______     ______   __     ______     ______    
+/\ \/ /    /\ \   /\ "-.\ \   /\  ___\   /\__  _\ /\ \   /\  ___\   /\  __ \   
+\ \  _"-.  \ \ \  \ \ \-.  \  \ \  __\   \/_/\ \/ \ \ \  \ \ \____  \ \  __ \  
+ \ \_\ \_\  \ \_\  \ \_\\"\_\  \ \_____\    \ \_\  \ \_\  \ \_____\  \ \_\ \_\ 
+  \/_/\/_/   \/_/   \/_/ \/_/   \/_____/     \/_/   \/_/   \/_____/   \/_/\/_/
+
+                   Embedded Sensor Data Server (Go)
+
+`
+
+func LaunchAPP(appVersion string) {
+	var build strings.Builder
+	build.WriteString(banner)
+	build.WriteString(strings.Repeat("-", 80))
+	build.WriteString(fmt.Sprintf("\nMode:         %s", "Console"))
+	build.WriteString(fmt.Sprintf("\nVersion:      %s", appVersion))
+	build.WriteString(fmt.Sprintf("\nStarted at:   %s", time.Now().Format("02-01-2006 15:04:05")))
+	build.WriteString(fmt.Sprintf("\nHost runtime: %s", runtime.Version()))
+	build.WriteString(fmt.Sprintf("\nInterfaces:   Server ←→ BLE ←→ Controller-Hub\n"))
+	build.WriteString(strings.Repeat("-", 80) + "\n")
+
+	fmt.Println(build.String())
+}
+===== ./utils/os/os.go =====
+package os
+
+import (
+	"os"
+	"os/exec"
+	"runtime"
+	"slices"
+)
+
+type OS string
+
+const (
+	Windows OS = "windows"
+	Linux   OS = "linux"
+	MacOs   OS = "darwin"
+)
+
+func IsSupportedOs(supportOs *[]OS) bool {
+	return slices.Contains(*supportOs, GetOS())
+}
+
+func GetOS() OS {
+	switch runtime.GOOS {
+	case "windows":
+		return Windows
+	case "linux":
+		return Linux
+	default:
+		return MacOs
+	}
+}
+
+func IsRoot() bool {
+	return os.Getuid() == 0
+}
+
+func CheckWifiCmd() bool {
+	switch GetOS() {
+	case MacOs:
+		return CheckCMD("networksetup")
+	case Linux:
+		return true
+	default:
+		return false
+	}
+}
+
+func CheckCMD(cmd string) bool {
+	if _, err := exec.LookPath(cmd); err != nil {
+		return false
+	}
+	return true
+}
+===== ./utils/errors/errorsWifi/wifi.go =====
+package errorsWifi
+
+import (
+	"errors"
+	errors2 "go-server/utils/errors"
+)
+
+var (
+	ErrWiFiConnect    = errors.New("failed to connect to WiFi")
+	ErrDeviceNotFound = errors.New("device not found")
+	ErrWifiTuring     = errors.New("turing failed")
+)
+
+func init() {
+	errors2.Registration(ErrWiFiConnect, errors2.ErrorResponse{Code: 3001, Message: "Could not connect to Wi-Fi", Tag: "wifi_connect"})
+	errors2.Registration(ErrDeviceNotFound, errors2.ErrorResponse{Code: 3002, Message: "Could not find Wi-Fi", Tag: "wifi_search"})
+	errors2.Registration(ErrWifiTuring, errors2.ErrorResponse{Code: 3003, Message: "Unable to turn on Wifi", Tag: "wifi_turing"})
+}
+===== ./utils/errors/errorsApp/app.go =====
+package errorsApp
+
+import (
+	"errors"
+	errors2 "go-server/utils/errors"
+)
+
+var (
+	ErrOsNotSupported      = errors.New("OS not supported")
+	ErrNeedSudo            = errors.New("not root")
+	ErrMissingCommandError = errors.New("missing command")
+)
+
+func init() {
+	errors2.Registration(ErrOsNotSupported, errors2.ErrorResponse{Code: 0001, Message: "OS not supported", Tag: "os_not_supported"})
+	errors2.Registration(ErrNeedSudo, errors2.ErrorResponse{Code: 0002, Message: "Must run as root (sudo)", Tag: "no_sudo"})
+	errors2.Registration(ErrMissingCommandError, errors2.ErrorResponse{Code: 0003, Message: "Can't work with cmd", Tag: "no_sudo"})
+}
+===== ./utils/errors/errorsBle/ble.go =====
+package errorsBle
+
+import (
+	"errors"
+	errors2 "go-server/utils/errors"
+)
+
+var (
+	ErrBLEDisabled = errors.New("failed to initialize BLE")
+)
+
+func init() {
+	errors2.Registration(ErrBLEDisabled, errors2.ErrorResponse{Code: 2001, Message: "BLE is disabled. Please turn it on and try again", Tag: "ble_init"})
+}
+===== ./utils/errors/errorsConfig/config.go =====
+package errorsConfig
+
+import (
+	"errors"
+	errors2 "go-server/utils/errors"
+)
+
+var (
+	ErrConfigOpen       = errors.New("cannot open config file")
+	ErrConfigRead       = errors.New("cannot read config file")
+	ErrConfigParse      = errors.New("invalid config format")
+	ErrMissingBLE       = errors.New("missing BLE CommandCharUUID")
+	ErrMissingTCPServer = errors.New("missing TCP server")
+	ErrMissingTCPPort   = errors.New("missing TCP port")
+	ErrMissingTCP       = errors.New("missing TCP block")
+)
+
+func init() {
+	errors2.Registration(ErrConfigOpen, errors2.ErrorResponse{Code: 1001, Message: "Cannot open configuration file", Tag: "config_open"})
+	errors2.Registration(ErrConfigRead, errors2.ErrorResponse{Code: 1002, Message: "Failed to read configuration file", Tag: "config_rea"})
+	errors2.Registration(ErrConfigParse, errors2.ErrorResponse{Code: 1003, Message: "Configuration file format is invalid", Tag: "config_parse"})
+	errors2.Registration(ErrMissingBLE, errors2.ErrorResponse{Code: 1004, Message: "Missing BLE UUID", Tag: "config_ble"})
+	errors2.Registration(ErrMissingTCPServer, errors2.ErrorResponse{Code: 1005, Message: "Missing TCP server", Tag: "config_tcp_server"})
+	errors2.Registration(ErrMissingTCPPort, errors2.ErrorResponse{Code: 1006, Message: "Missing TCP port", Tag: "config_tcp_port"})
+	errors2.Registration(ErrMissingTCP, errors2.ErrorResponse{Code: 1007, Message: "Missing TCP block", Tag: "config_tcp_block"})
+}
+===== ./utils/errors/errors.go =====
+package errors
+
+import (
+	"fmt"
+)
+
+type ErrorResponse struct {
+	Code    int
+	Message string
+	Tag     string
+}
+
+var registry = make(map[error]ErrorResponse)
+
+func Registration(err error, resp ErrorResponse) {
+	registry[err] = resp
+}
+
+func MapError(err error) ErrorResponse {
+	if resp, ok := registry[err]; ok {
+		return resp
+	}
+	return ErrorResponse{Code: 9999, Message: "Unknown error occurred", Tag: "unknown"}
+}
+
+func PrintError(err error) {
+	e := MapError(err)
+	fmt.Printf("❌ [%s] %s (code: %d)\n", e.Tag, e.Message, e.Code)
+}

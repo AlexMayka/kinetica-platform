@@ -1,0 +1,2 @@
+source /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader/gdbinit/symbols
+source /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader/gdbinit/connect

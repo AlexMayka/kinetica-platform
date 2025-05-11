@@ -1,0 +1,12 @@
+Command: /Users/aleksejmajka/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/tools/idf_monitor.py -p /dev/cu.usbmodem1301 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/imu-sensor.elf /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader/bootloader.elf -m '/Users/aleksejmajka/.espressif/python_env/idf5.5_py3.12_env/bin/python' '/Users/aleksejmajka/Desktop/Work/esp32/esp-idf/tools/idf.py' '-p' '/dev/cu.usbmodem1301'
+[0;33m--- esp-idf-monitor 1.6.2 on /dev/cu.usbmodem1301 115200[0m
+[0;33m--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H[0m
+[0;33m--- 0x420058cc: uart_ll_get_txfifo_len at /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/hal/esp32c3/include/hal/uart_ll.h:417
+---  (inlined by) uart_tx_char at /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/esp_driver_uart/src/uart_vfs.c:190
+[0m
+[0;33m--- 0x403cbf10: esp_bootloader_get_description at /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/esp_bootloader_format/esp_bootloader_desc.c:39 (discriminator 1)
+[0m
+[0;33m--- 0x403ce710: esp_flash_encryption_enabled at /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/bootloader_support/src/flash_encrypt.c:89
+[0m
+[0;33m--- 0x403cbf1a: call_start_cpu0 at /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:25
+[0m

@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/CMakeFiles/bootloader
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/CMakeFiles/bootloader.rule
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/CMakeFiles/bootloader-complete.rule
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

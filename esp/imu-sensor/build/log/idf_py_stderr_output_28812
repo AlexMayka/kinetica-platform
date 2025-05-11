@@ -1,0 +1,15 @@
+Command: /Users/aleksejmajka/.espressif/python_env/idf5.5_py3.12_env/bin/python /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/tools/idf_monitor.py -p /dev/cu.usbmodem1401 -b 115200 --toolchain-prefix riscv32-esp-elf- --target esp32c3 --revision 3 --decode-panic backtrace /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/imu-sensor.elf /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/bootloader/bootloader.elf -m '/Users/aleksejmajka/.espressif/python_env/idf5.5_py3.12_env/bin/python' '/Users/aleksejmajka/Desktop/Work/esp32/esp-idf/tools/idf.py' '-p' '/dev/cu.usbmodem1401'
+[0;33m--- esp-idf-monitor 1.6.2 on /dev/cu.usbmodem1401 115200[0m
+[0;33m--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H[0m
+[0;33m--- 0x4004c0d4: uart_tx_one_char_uart.part.0 in ROM
+[0m
+[0;33m--- 0x403cbf10: esp_bootloader_get_description at /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/esp_bootloader_format/esp_bootloader_desc.c:39 (discriminator 1)
+[0m
+[0;33m--- 0x403ce710: esp_flash_encryption_enabled at /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/bootloader_support/src/flash_encrypt.c:89
+[0m
+[0;33m--- 0x403cbf1a: call_start_cpu0 at /Users/aleksejmajka/Desktop/Work/esp32/esp-idf/components/bootloader/subproject/main/bootloader_start.c:25
+[0m
+[1;31m--- Error: read failed: [Errno 6] Device not configured[0m
+[0;33m--- Waiting for the device to reconnect[0m[0;33m.[0m[0;33m[0m
+[1;31m--- Error: read failed: [Errno 6] Device not configured[0m
+[0;33m--- Waiting for the device to reconnect[0m[0;33m.[0m[0;33m[0m
