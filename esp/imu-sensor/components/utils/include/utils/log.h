@@ -6,10 +6,11 @@ extern "C" {
 
     #include "esp_log.h"
 
-    #define TAG_MAIN     "MAIN"
-    #define TAG_BLE      "BLE"
-    #define TAG_LED      "LED"
-    #define TAG_ESP_NOW  "ESP_NOW"
+    #define TAG_MAIN        "MAIN"
+    #define TAG_BLE         "BLE"
+    #define TAG_FMS         "FMS"
+    #define TAG_LED         "LED"
+    #define TAG_ESP_NOW     "ESP_NOW"
     #define LOG_TAG_DEFAULT "APP"
 
     #define LOGI(tag, fmt, ...) ESP_LOGI(tag, fmt, ##__VA_ARGS__)

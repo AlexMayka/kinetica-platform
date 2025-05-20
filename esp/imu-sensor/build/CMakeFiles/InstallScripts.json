@@ -118,8 +118,9 @@
 		"/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/ulp/cmake_install.cmake",
 		"/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/usb/cmake_install.cmake",
 		"/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/wifi_provisioning/cmake_install.cmake",
-		"/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/ble/cmake_install.cmake",
 		"/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/utils/cmake_install.cmake",
+		"/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/ble/cmake_install.cmake",
+		"/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/fms/cmake_install.cmake",
 		"/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/main/cmake_install.cmake"
 	],
 	"Parallel" : false

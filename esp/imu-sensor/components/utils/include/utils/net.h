@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
     void get_mac_str(char *out_mac_str);
+    void wifi_init_for_esp_now(void);
 
 #ifdef __cplusplus
 }

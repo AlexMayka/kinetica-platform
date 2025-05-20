@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-    void ble_init(const char *device_name);
+    void ble_advertise_start(const char *device_name);
 
 #ifdef __cplusplus
 }

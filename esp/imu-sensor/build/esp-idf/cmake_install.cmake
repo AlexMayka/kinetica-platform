@@ -554,12 +554,17 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/utils/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/ble/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/utils/cmake_install.cmake")
+  include("/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/fms/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)

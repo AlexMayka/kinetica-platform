@@ -150,8 +150,10 @@
 /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/spiffs/libspiffs.a
 /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/json/libjson.a
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/utils/libutils.a
 /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/ble/libble.a
 /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/utils/libutils.a
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/fms/libfms.a
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/ble/libble.a
 /Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/main/libmain.a
-/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/ble/libble.a
-/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/utils/libutils.a
+/Users/aleksejmajka/Desktop/Work/Basket/esp/imu-sensor/build/esp-idf/fms/libfms.a
